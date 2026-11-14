@@ -8,6 +8,8 @@ import pandas as pd
 import numpy as np
 import json
 import html
+from typing import Optional, Any
+from pathlib import Path
 from dashboard.ui_theme import (
     render_command_header,
     render_kpi_card,
@@ -25,42 +27,49 @@ def esc(val, default="N/A"):
 
 def render_alert_investigation_view(
     alerts: pd.DataFrame,
-    selected_org_id: str = "ORG-0004"
+    selected_org_id: str = "ORG-0004",
+    parquet_path: Optional[Any] = None,
+    total_corpus_alerts: Optional[int] = None
 ):
-    """Render the forensic deep-dive alert investigation workbench."""
+    """Render the forensic deep-dive alert investigation workbench with on-demand full-corpus search."""
+    display_total = total_corpus_alerts if (total_corpus_alerts and total_corpus_alerts > 0) else len(alerts)
     render_command_header(
         page_title="Forensic Alert Investigation Workbench",
         page_subtitle="In-Depth Telemetry Inspection, Isolation Forest Attribution & Evidence Quality Audit",
         active_cse=selected_org_id,
-        total_alerts=len(alerts)
+        total_alerts=display_total
     )
 
     # 1. Quick Presets & Search
     render_section_header(
         title="Select Alert for Forensic Deep Dive",
-        subtitle="Search by unique alert identifier or select an operational priority preset.",
+        subtitle="Search by unique alert identifier across the complete corpus or select an operational preset.",
         badge="ALERT SELECTOR"
     )
 
     num_s = pd.to_numeric(alerts["_alert_id"], errors="coerce") if "_alert_id" in alerts.columns else pd.Series(dtype=float)
     is_all_numeric = num_s.notna().all() and not num_s.empty
 
-    if is_all_numeric:
+    if total_corpus_alerts and total_corpus_alerts > 0:
+        max_id = max(int(num_s.max() or 0), total_corpus_alerts - 1)
+        min_id = 0
+    elif is_all_numeric:
         max_id = int(num_s.max() or 0)
         min_id = int(num_s.min() or 0)
     else:
-        max_id, min_id = len(alerts) - 1, 0
+        max_id, min_id = max(len(alerts) - 1, 0), 0
 
     col_s1, col_s2, col_s3, col_s4, col_s5 = st.columns([1.5, 1, 1, 1, 1])
     with col_s1:
-        if is_all_numeric:
+        if is_all_numeric or (total_corpus_alerts and total_corpus_alerts > 0):
             search_id = st.number_input(
                 "Alert Identifier (_alert_id)",
                 min_value=min_id,
                 max_value=max_id,
                 value=int(st.session_state.get("ai_search_id_input", min_id)),
                 step=1,
-                key="ai_search_id_input"
+                key="ai_search_id_input",
+                help=f"Enter any alert identifier from 0 to {max_id:,} to inspect full forensic telemetry."
             )
         else:
             id_options = alerts["_alert_id"].astype(str).tolist()[:5000]
@@ -76,23 +85,26 @@ def render_alert_investigation_view(
     with col_s2:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
         if st.button("⚡ Top #1 Threat", width="stretch", key="ai_btn_top1"):
-            top1 = alerts.sort_values("priority_rank").iloc[0]
-            st.session_state["ai_search_id_input"] = int(top1["_alert_id"]) if is_all_numeric else str(top1["_alert_id"])
-            st.rerun()
+            top1 = alerts.iloc[0] if not alerts.empty else None
+            if top1 is not None:
+                st.session_state["ai_search_id_input"] = int(top1["_alert_id"]) if is_all_numeric else str(top1["_alert_id"])
+                st.rerun()
     with col_s3:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
         if st.button("🔥 Top #25 Threat", width="stretch", key="ai_btn_top25"):
             idx = min(24, len(alerts) - 1)
-            top25 = alerts.sort_values("priority_rank").iloc[idx]
-            st.session_state["ai_search_id_input"] = int(top25["_alert_id"]) if is_all_numeric else str(top25["_alert_id"])
-            st.rerun()
+            top25 = alerts.iloc[idx] if not alerts.empty else None
+            if top25 is not None:
+                st.session_state["ai_search_id_input"] = int(top25["_alert_id"]) if is_all_numeric else str(top25["_alert_id"])
+                st.rerun()
     with col_s4:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
         if st.button("🚨 Top #100 Threat", width="stretch", key="ai_btn_top100"):
             idx = min(99, len(alerts) - 1)
-            top100 = alerts.sort_values("priority_rank").iloc[idx]
-            st.session_state["ai_search_id_input"] = int(top100["_alert_id"]) if is_all_numeric else str(top100["_alert_id"])
-            st.rerun()
+            top100 = alerts.iloc[idx] if not alerts.empty else None
+            if top100 is not None:
+                st.session_state["ai_search_id_input"] = int(top100["_alert_id"]) if is_all_numeric else str(top100["_alert_id"])
+                st.rerun()
     with col_s5:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
         if st.button("🎯 Random Incident", width="stretch", key="ai_btn_random"):
@@ -102,11 +114,30 @@ def render_alert_investigation_view(
                 st.session_state["ai_search_id_input"] = int(pick["_alert_id"]) if is_all_numeric else str(pick["_alert_id"])
                 st.rerun()
 
-    # Locate alert
+    # Locate alert in active memory queue
     if is_all_numeric:
         selected = alerts[pd.to_numeric(alerts["_alert_id"], errors="coerce") == search_id]
     else:
         selected = alerts[alerts["_alert_id"].astype(str) == str(search_id)]
+
+    is_ondemand_query = False
+    # If not in active queue, perform selective on-demand Parquet disk lookup
+    if selected.empty and parquet_path is not None:
+        p_path = Path(parquet_path)
+        if p_path.exists():
+            try:
+                import pyarrow.parquet as pq
+                avail_cols = [c for c in alerts.columns] if not alerts.empty else None
+                try:
+                    num_id = int(search_id)
+                    table = pq.read_table(str(p_path), columns=avail_cols, filters=[('_alert_id', '=', num_id)])
+                except (ValueError, TypeError):
+                    table = pq.read_table(str(p_path), columns=avail_cols, filters=[('_alert_id', '=', str(search_id))])
+                if table.num_rows > 0:
+                    selected = table.to_pandas()
+                    is_ondemand_query = True
+            except Exception:
+                pass
 
     if selected.empty:
         st.warning(f"No alert found for Alert ID: {search_id}")
@@ -114,17 +145,32 @@ def render_alert_investigation_view(
 
     row = selected.iloc[0]
 
+    # Display on-demand query banner if fetched directly from disk
+    if is_ondemand_query:
+        st.markdown(
+            f"""
+            <div style="background:rgba(14,165,233,0.12); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:8px 14px; margin:4px 0 12px 0; font-size:0.78rem; color:#38BDF8; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1.15rem;">⚡</span>
+                <div><strong>On-Demand Telemetry Record:</strong> Alert ID <code>#{search_id}</code> was fetched dynamically from disk storage (outside active in-memory queue). Full forensic attribution, Mitre tactics, and telemetry fields are active.</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # 2. Executive Alert Header Cards
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     h1, h2, h3, h4 = st.columns(4)
     with h1:
         rank_val = f"#{int(row['priority_rank']):,}" if pd.notna(row.get("priority_rank")) else "N/A"
+        total_for_rank = display_total if display_total > 0 else max(len(alerts), 1)
+        rank_num = float(row.get('priority_rank', 0))
+        pct_tier = (rank_num / total_for_rank * 100) if rank_num > 0 else 0.0
         render_kpi_card(
             title="Operational Priority Rank",
             value=rank_val,
-            subtitle=f"Queue position across {len(alerts):,} alerts",
-            delta=f"Top {(float(row.get('priority_rank', 0)) / max(len(alerts), 1) * 100):.2f}% Tier",
-            delta_type="critical" if float(row.get("priority_rank", 999999)) <= 4023 else "neutral"
+            subtitle=f"Queue position across {total_for_rank:,} alerts",
+            delta=f"Top {pct_tier:.2f}% Tier",
+            delta_type="critical" if rank_num <= (total_for_rank * 0.01) else ("warning" if rank_num <= (total_for_rank * 0.05) else "neutral")
         )
     with h2:
         score_val = f"{float(row.get('anomaly_score', 0)):.6f}"
