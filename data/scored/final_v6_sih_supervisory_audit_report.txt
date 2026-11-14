@@ -1,0 +1,30 @@
+SAT-SA V6 SUPERVISORY PEER COMPARISON + AUDIT REPORT
+==========================================================
+Input: data/scored/final_v6_sih_context_layer.csv
+Output: data/scored/final_v6_sih_supervisory_audit.csv
+Input SHA-256: e849d938fa178269db3de5fc2c9bf86b7d7fe6de1ae09d88948d1daee6d15da0
+Rows processed: 402,335
+Peer grouping columns: alert_type, severity_context
+Peer metrics evaluated: investigation_evidence_count, telemetry_evidence_count, evidence_gap_count, execution_gap_count, negative_space_count
+Minimum peer group size: 30
+Rows with peer comparison supported: 401,293
+Rows with supervisory review recommended: 20,665
+
+INTEGRITY CHECKS
+row_count_unchanged: PASS
+alert_ids_unchanged_in_order: PASS
+priority_ranks_unchanged_in_order: PASS
+anomaly_scores_unchanged_in_order: PASS
+priority_scores_unchanged_in_order: PASS
+alert_id_unique: PASS
+incident_labels_excluded_from_peer_calculation: PASS
+
+LIMITATIONS
+- Peer groups are defined by observed alert type and severity fields when available.
+- Robust peer deviation is a review signal, not a threat probability or proof of wrongdoing.
+- Small groups and zero-variation metrics are marked unsupported rather than guessed.
+- Incident IDs/labels are not used in peer calculations.
+- Rapid-closure duration and remediation completion remain unsupported unless source fields provide reliable evidence.
+- This add-on does not change V6 anomaly scores, priority scores, or ranks.
+
+RESULT: PASS

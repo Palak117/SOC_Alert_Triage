@@ -1,0 +1,49 @@
+FINAL V6 SIH CONTEXT LAYER REPORT
+==========================================================================================
+
+V6 INTEGRITY
+Isolation Forest scores were not changed.
+Priority scores were not changed.
+Priority ranks were not changed.
+No model retraining was performed.
+No incident labels were used for scoring.
+Context flags are review indicators, not proof of SOC failure.
+Entity frequency is descriptive context only; frequent entities are not inherently suspicious.
+Missing escalation-role metadata does not prove that escalation was missed.
+
+DATASET
+Rows: 402,335
+Post-hoc incident alerts: 3,113
+
+SIH CONTEXT COVERAGE
+Alert metadata: AVAILABLE
+Network/entity context: AVAILABLE
+Case/workflow context: AVAILABLE
+Escalation-related context: PARTIALLY AVAILABLE
+Disposition/closure context: AVAILABLE
+Asset/system context: AVAILABLE
+
+EXECUTION-GAP SIGNALS
+Rows with execution-gap flags: 20,665
+Investigation-with-limited-evidence: 0
+Repeated entities: 402,300
+Low telemetry: 20,665
+
+NEGATIVE-SPACE SIGNALS
+Rows with evidence-based negative-space flags: 20,665
+Missing escalation-role metadata is tracked separately and does not, by itself, count as negative space.
+
+UNSUPPORTED / NOT FABRICATED
+Rapid closure duration: not available because the dataset does not provide a reliable case-open timestamp and closure timestamp pair.
+Peer deviation: not calculated because a defined peer-group population is not supplied.
+Remediation completion: not calculated because a reliable remediation-completion field is not supplied.
+Missing monitoring coverage: represented only through observable low-telemetry evidence, not claimed as a definitive monitoring outage.
+
+GROUND TRUTH POLICY
+incident_ids are attached only for post-hoc evaluation.
+label_binary is not used for V6 scoring.
+label_confidence is not used for V6 scoring.
+
+TRACEABILITY
+_alert_id maps every context row to the original chronological test row.
+V6 ranking remains the production ranking.

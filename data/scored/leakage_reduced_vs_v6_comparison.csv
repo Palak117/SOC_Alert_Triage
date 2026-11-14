@@ -1,0 +1,7 @@
+K,Baseline_Incident_Precision,Leakage_Reduced_Incident_Precision,Baseline_Security_Precision,Leakage_Reduced_Security_Precision,Baseline_Unique_Incidents,Leakage_Reduced_Unique_Incidents
+100,79.0%,29.0%,99.0%,97.0%,24/44 (54.5%),5/44 (11.4%)
+500,82.8%,33.0%,98.4%,96.4%,33/44 (75.0%),13/44 (29.5%)
+1000,77.4%,32.9%,97.5%,98.0%,38/44 (86.4%),22/44 (50.0%)
+5000,58.7%,24.4%,97.5%,98.4%,44/44 (100.0%),34/44 (77.3%)
+10000,30.8%,25.4%,98.6%,98.9%,44/44 (100.0%),39/44 (88.6%)
+25000,12.5%,12.5%,53.5%,53.5%,44/44 (100.0%),44/44 (100.0%)

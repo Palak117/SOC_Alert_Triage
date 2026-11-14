@@ -1,0 +1,75 @@
+# MASTER ISSUE & DEFECT REGISTER — SAT-SA (SIH26157)
+
+**Audit Date:** 2026-11-14  
+**Auditor:** Independent Technical Forensic Audit  
+**Total Verified Issues:** **28** (**7 Critical**, **10 High**, **7 Medium**, **4 Low**)
+
+---
+
+## 1. Summary by Severity & Subsystem
+
+| Severity | ML & Inference | Multi-CSE & Supervisory | Frontend & UX | Security, Data & Tests | Total |
+|---|---:|---:|---:|---:|---:|
+| **CRITICAL** | 2 | 2 | 3 | 0 | **7** |
+| **HIGH** | 2 | 2 | 4 | 2 | **10** |
+| **MEDIUM** | 1 | 2 | 2 | 2 | **7** |
+| **LOW** | 0 | 0 | 2 | 2 | **4** |
+| **TOTAL** | **5** | **6** | **11** | **6** | **28** |
+
+---
+
+## 2. Complete Forensic Issue Register
+
+### CRITICAL Issues (7)
+
+| Issue ID | Severity | Subsystem | Exact Location (`file:line`) | Title & Technical Root Cause | Operational / Supervisory Impact |
+|---|---|---|---|---|---|
+| **ISS-01** | **CRITICAL** | ML / Inference | `backend/batch_prediction.py:93-181` | **Severe Training-vs-Inference Feature Mismatch in Live, Batch & Multi-CSE Scoring:** `extract_arrival_time_features()` computes only 27 basic features and hardcodes **23 of 50 features** (or **27 of 54** in V6 Baseline) to **`0.0`**, including all 9 rarity features (`*_rarity`) and all 14 causal history features (`*_previous_count`, `*_first_seen`). Across the first 100 rows of `test_20.csv`, 26 of 50 columns differ from `X_test_unsupervised_v6.csv`, shifting mean anomaly score from `-0.0546` to `+0.0749` (`MAE = 0.1295`). | Live single-alert triage, batch CSV/JSON uploads, and Multi-CSE scoring for `ORG-0001`, `ORG-0003`, and `ORG-0005` operate on a degraded, zero-padded feature space that does not match the trained Isolation Forest. |
+| **ISS-02** | **CRITICAL** | ML / Evaluation | `model/create_unsupervised_features_v6.py:764, 781` | **Target Proxy Leakage (`suspicion_score`) in Primary V6 Baseline Model:** `isolation_forest_unsupervised_v6.pkl` (54 features) includes `suspicion_score`, which has a verified **`r = 0.9618` Pearson correlation with `actual_incident`** on `test_20.csv`, plus `lifecycle_stage_rarity`. Removing them in `isolation_forest_v6_leakage_reduced.pkl` (50 features) drops Incident Precision@100 from `79.0%` (`24/44` unique incidents) to `29.0%` (`5/44` unique incidents), and Top-5,000 Unique Incident Recall from `100.0%` (`44/44`) to `77.27%` (`34/44`). | Primary headline incident-discovery metrics at tight budgets ($K \le 5,000$) rely heavily on a vendor-computed suspicion score proxy rather than purely raw telemetry features (though Security-Relevant Precision@100 remains `97.0%` without it). |
+| **ISS-03** | **CRITICAL** | Multi-CSE / Supervisory | `scratch/build_multientity_data.py:97-110, 149-151` | **Zeroed-Out Multi-CSE Execution & Evidence Gap Rates (`0.0%` Across All 4 CSEs):** 1) Lines `149-151` check `evidence_gap_count.gt(1)` and `execution_gap_count.gt(1)`, but in `dashboard_consolidated.parquet` (`ORG-0004`) both columns only take values `0` or `1` (never `> 1`), yielding `0.0%`. 2) Lines `97-105` check `.isna()` on `precinct6_cybersecurity.parquet` where missing values are empty strings `""` (not `NaN`), yielding `0.0%` for `ORG-0001/0003/0005`. | In `multientity_supervisory_summary.json`, `execution_gap_rate` is **`0.0%` for all 4 CSEs** and `evidence_gap_rate` is **`0.0%` for all 4 CSEs**, invalidating Cross-CSE gap comparisons. |
+| **ISS-04** | **CRITICAL** | Multi-CSE / Risk Scoring | `scratch/build_multientity_data.py:160-182, 224-243` | **Constant 8-Domain Scores & Degenerate Cross-Entity Robust Z-Scores (`+346.44σ`):** Because `ev_gap == 0.0%` and `exec_gap == 0.0%` for all 4 CSEs, **3 of 8 domains (`Triage Quality = 92.0`, `Escalation = 95.0`, `Operational Discipline = 95.0`) are identical constants across all 4 CSEs**, and `Governance` is `95.0` for 3 CSEs. Furthermore, with 3 zeros out of 4 entities (`MAD = 0` replaced by `0.01`), `ORG-0004` receives a mathematically degenerate Robust Z-score of **`+346.44σ`** for `negative_space_rate` and **`-37.02σ`** for `mean_anomaly_score`. | Multi-CSE 8-domain scorecards and cohort Z-scores on Page 8 (`08 // Multi-CSE Command`) are largely static/corrupted artifacts of upstream zeroing bugs. |
+| **ISS-05** | **CRITICAL** | Frontend / State | `dashboard/app.py:489, 875-890, 958-997` | **Sidebar CSE Entity Selector Is Completely Disconnected From Pages 1–5:** Selecting `ORG-0001`, `ORG-0003`, `ORG-0005`, or `All CSEs` in the sidebar updates the top header badge (`app.py:948`) but **never filters `alerts` or loads `dashboard_multientity_sample.parquet`**. | Pages 1–5 always display `ORG-0004`'s `402,335` alerts regardless of which CSE is selected in the sidebar, misleading the supervisor. |
+| **ISS-06** | **CRITICAL** | Frontend / Charts | `dashboard/views/overview.py:154` | **Overview Discovery Trajectory Chart Never Renders:** Checks `if not review.empty and "V6_Unique_Incidents" in review.columns:`. The actual column in `final_v6_sih_dashboard_review_fractions.csv` is `"Unique_Incidents_Found"`, so the condition is always `False`. | Executive Overview always shows `"Discovery trajectory telemetry unavailable."` instead of the discovery curve. |
+| **ISS-07** | **CRITICAL** | Frontend / Charts | `dashboard/views/incident_discovery.py:83-84` | **Incident Discovery Curve Plots Flat Horizontal Lines at `Y = 0`:** Reads `rev_df.get("V6_Unique_Incidents", pd.Series(0, ...))` and `rev_df.get("Chronological_Unique_Incidents", pd.Series(0, ...))`, neither of which exists in `final_v6_sih_dashboard_review_fractions.csv`. | The primary chart on `03 // Incident Discovery` plots two flat `0` lines across all review fractions. |
+
+---
+
+### HIGH Issues (10)
+
+| Issue ID | Severity | Subsystem | Exact Location (`file:line`) | Title & Technical Root Cause | Operational / Supervisory Impact |
+|---|---|---|---|---|---|
+| **ISS-08** | **HIGH** | ML / Inference | `backend/batch_prediction.py:147-172` | **`.astype(str)` Before `.fillna("")` Converts Missing CSV Values (`NaN`) into `"nan"`:** In `extract_arrival_time_features()`, calling `.astype(str)` on `pd.read_csv` columns containing `np.nan` converts `np.nan` into the 3-character string `"nan"`, which is non-empty! | Every missing `src_ip`, `dst_ip`, `src_host`, `dst_host`, `username`, and `message_sanitized` in a CSV upload is falsely encoded as present (`has_src_ip = 1`, `has_username = 1`, `username_length = 3`, `message_length = 3`). |
+| **ISS-09** | **HIGH** | ML / Inference | `backend/batch_prediction.py:139-144, 165` | **Divergent Port, Protocol, and Message-Bucket Encodings in Inference:** `src_port_privileged` sets `1` when port is `0` (`src_p < 1024` vs `(src_p > 0) & (src_p < 1024)` in training); `src_port_category` uses binary `0/1` instead of `0..3`; `protocol_category` uses raw protocol instead of `{0,1,6,17}`; `message_size_bucket` uses sample-dependent `pd.qcut` (collapsing to `0` on single alerts) instead of fixed thresholds. | Distorts arrival-time feature vectors during live and batch inference. |
+| **ISS-10** | **HIGH** | Multi-CSE / Pipeline | `scratch/build_multientity_data.py:66-115` | **Inconsistent Scoring Pipelines Across CSEs (`54-Feature Offline` vs `27-Feature Online`):** `ORG-0004` uses offline 54-feature scores (`mean = -0.0798`), while `ORG-0001/0003/0005` are scored via `extract_arrival_time_features()` (`27` features + `27` zeros, `mean = +0.0185` to `+0.0223`). | Invalidates cross-entity `mean_anomaly_score` comparisons and Domain 1 (`Threat Detection`) comparisons. |
+| **ISS-11** | **HIGH** | Multi-CSE / Data | `scratch/build_multientity_data.py:194` | **Broken Epoch Timestamp Parsing (`"1970-01-01 to 1970-01-01"`):** Calls `pd.to_datetime(df["timestamp"], errors="coerce")` on float Unix epoch seconds (`1721992223`) without `unit="s"`, parsing `2024-07-26` as `1.72` seconds after `1970-01-01`. | `multientity_supervisory_summary.json` and exported audit dossiers report `"date_range": "1970-01-01 to 1970-01-01"` and `"time_window_days": 1.0` for all 4 CSEs. |
+| **ISS-12** | **HIGH** | Frontend / State | `dashboard/app.py:489-495` | **Model Switcher Does Not Switch `summary`, `incidents`, or `review` CSVs:** Selecting `"Leakage-Reduced Candidate (50 Clean Features)"` loads `dashboard_consolidated_leakage_reduced.parquet`, but still loads `final_v6_sih_dashboard_*.csv` instead of `leakage_reduced_dashboard_*.csv`. | Summary tables and incident discovery data remain pinned to the 54-feature Baseline V6 model even when the 50-feature Leakage-Reduced model is selected. |
+| **ISS-13** | **HIGH** | Frontend / UI | `dashboard/views/overview.py:59-81, 101-108`<br>`incident_discovery.py:37-67` | **Contradictory Hardcoded Metric Literals on Page 1 & Page 3:** `overview.py:59-81` hardcodes Baseline V6 metrics (`"100% full recall at Top 5k"`, `"79.0% Precision@100"`), while `overview.py:101-108` right below it hardcodes Leakage-Reduced metrics (`"5 / 44 Incidents"`, `"77.3% Recall"` at Top 5k). Neither updates when switching models. | Displays mutually contradictory recall and incident counts on the same screen. |
+| **ISS-14** | **HIGH** | Frontend / Tables | `dashboard/views/incident_discovery.py:148-151` | **100x Percentage Formatting Bug in Top-K Evaluation Milestones Table:** Applies `format="%.2f%%"` directly to `[0, 1]` proportions (`0.79`, `1.0`) without multiplying by `100`. | Displays `79.0%` precision as **`0.79%`** and `100.0%` recall as **`1.00%`**. |
+| **ISS-15** | **HIGH** | Frontend / Tables | `dashboard/views/incident_discovery.py:168-174` | **Missing Primary Columns in Unique Incident Discovery Ledger:** Looks for `["incident_ids", "earliest_discovery_rank", "earliest_alert_timestamp"]` whereas the CSV has `["incident_id", "first_priority_rank", "first_timestamp"]`. | Omits Incident ID, First Rank, and Timestamp—rendering only 2 columns (`Associated Alerts` and `Severity`). |
+| **ISS-16** | **HIGH** | Frontend / Tables | `dashboard/views/context_gaps.py:125-135` | **Misleading `"Peer Deviation Outlier Registry (> 3σ)"` Table:** Filters `alerts[alerts["priority_label"].isin(["Critical", "High"])].head(25)` instead of `peer_deviation_review_signal == True` and omits all `peer_robust_z_*` columns. | Shows top-ranked anomaly alerts rather than actual peer-group statistical outliers. |
+| **ISS-17** | **HIGH** | Security | `dashboard/views/alert_investigation.py:139-145, 227-239` | **Stored HTML / XSS Injection via `unsafe_allow_html=True`:** Raw alert strings (`message_sanitized`, `username`, `src_host`, `dst_host`, `matched_rules`) are interpolated into HTML f-strings without `html.escape()`. | Attacker-crafted alert payloads can execute arbitrary HTML/JavaScript in the supervisor's browser. |
+
+---
+
+### MEDIUM Issues (7)
+
+| Issue ID | Severity | Subsystem | Exact Location (`file:line`) | Title & Technical Root Cause | Operational / Supervisory Impact |
+|---|---|---|---|---|---|
+| **ISS-18** | **MEDIUM** | Data Split | `preprocessing/split_data.py:18-24` | **Global Chronological Split Places Only `ORG-0004` in `test_20.csv`:** Because `ORG-0001`, `ORG-0003`, and `ORG-0005` end on `2024-07-27 06:00` while `ORG-0004` continues until `2024-08-01 06:00`, the last 20% chronological split (`test_20.csv`, `402,335` rows) contains 100% `ORG-0004`. | Offline evaluation metrics (`test_20.csv`) only measure generalization on `ORG-0004`, not across all 4 organizations. |
+| **ISS-19** | **MEDIUM** | Supervisory Signals | `model/create_sih_context_layer_v6.py:1098` | **`critical_missing_context_signal` Is Always `False` (`0` Rows):** Checks `severity_context.str.lower().isin(["critical", "high", "4", "5", ...])`, whereas raw `severity` in `test_20.csv` is coded as `'1'`, `'2'`, `'3'`. | Critical-severity missing-context execution gaps are never triggered (`0 / 402,335`). |
+| **ISS-20** | **MEDIUM** | Multi-CSE Trends | `scratch/build_multientity_data.py:245-256` | **Synthetic Row-Chunk Trend Periods (`P1..P4`) With `0.0%` Gap Rates:** Splits each entity dataframe into 4 equal row slices (`np.array_split(df, 4)`) rather than calendar time buckets, and hardcodes `exec_gap_pct` via `.gt(1)` to `0.0%` across all periods. | Historical trend analysis on Page 8 does not reflect true temporal intervals or execution gap trajectories. |
+| **ISS-21** | **MEDIUM** | Frontend / Layout | `dashboard/views/*.py` (6 files) | **Broken `<div class="cyber-card">` Wrapper Pattern:** Opening `<div>` in one `st.markdown()` call and closing `</div>` in a later `st.markdown()` call renders an empty `<div class="cyber-card"></div>` bar above Streamlit widgets instead of wrapping them. | Visual empty card artifacts above charts and tables across 6 views. |
+| **ISS-22** | **MEDIUM** | Frontend / State | `dashboard/views/alert_investigation.py:55-74` | **Quick-Jump Preset Buttons Do Not Persist in Session State:** Clicking `"⚡ Top #1 Threat"` etc. sets local `search_id` for one render without updating `st.session_state["ai_search_id_input"]`. | Next widget interaction reverts to the text input's prior value (`"292691"`). |
+| **ISS-23** | **MEDIUM** | Security / Air-Gap | `dashboard/ui_theme.py:52` | **External Google Fonts CSS `@import`:** Fetches `Inter` and `JetBrains Mono` from `https://fonts.googleapis.com/css2?...` on every page load. | Violates strict offline/air-gapped isolation in disconnected networks. |
+| **ISS-24** | **MEDIUM** | Test Suite | `tests/test_batch_prediction.py` & `tests/test_live_prediction.py` | **Tests Write Directly to Production `data/submissions/` Directory:** Tests do not use temporary directories (`tmp_path`), leaving 44 test `.parquet` files and test manifest entries in `data/submissions/`. | Pollutes user-facing batch submission ledger and live prediction history. |
+
+---
+
+### LOW Issues (4)
+
+| Issue ID | Severity | Subsystem | Exact Location (`file:line`) | Title & Technical Root Cause | Operational / Supervisory Impact |
+|---|---|---|---|---|---|
+| **ISS-25** | **LOW** | Frontend / Labels | `dashboard/views/live_prediction.py:35` | **Stale Feature Count Labels (`21` and `23` Features):** Displays `"Leakage-Reduced (21 Features)"` and `"Baseline V6 (23 Features)"` instead of `50` and `54` features. | Cosmetic label inaccuracy on Page 7. |
+| **ISS-26** | **LOW** | Code Hygiene | `dashboard/app.py:552-849` | **~300 Lines of Unreachable Legacy View Functions in `app.py`:** Retained after modular routing and `st.stop()`. | Dead code maintenance overhead. |
+| **ISS-27** | **LOW** | Packaging | `requirements.txt:1-6` | **Missing `plotly`, `datasets`, and `pytest` in `requirements.txt`:** `plotly` is required by the dashboard UI (`ui_theme.py` and 4 views) but omitted from `requirements.txt`. | Fresh virtual environment installation from `requirements.txt` fails at startup. |
+| **ISS-28** | **LOW** | Data Schema | `data/scored/dashboard_consolidated.parquet` | **Four Redundant Timestamp Columns:** Stores `timestamp`, `event_time`, `timestamp_datetime`, and `Timestamp` simultaneously across `402,335` rows. | Increases Parquet memory footprint by ~15–20 MB unnecessarily. |

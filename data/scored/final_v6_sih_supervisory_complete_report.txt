@@ -1,0 +1,35 @@
+SAT-SA COMPLETE SUPERVISORY ANALYTICS + TRACEABILITY REPORT
+================================================================
+Input: data\scored\final_v6_sih_context_layer.csv
+Output: data\scored\final_v6_sih_supervisory_complete.csv
+Input SHA-256: e849d938fa178269db3de5fc2c9bf86b7d7fe6de1ae09d88948d1daee6d15da0
+Rows processed: 402,335
+Peer grouping columns: alert_type, severity_context
+Peer metrics evaluated: investigation_evidence_count, telemetry_evidence_count, evidence_gap_count, execution_gap_count, negative_space_count, entity_alert_frequency, source_ip_frequency, destination_ip_frequency
+Rows with peer comparison supported: 401,293
+Rows with peer deviation review signal: 109,227
+Rows with evidence-gap review indicator: 20,665
+Rows with entity-frequency review signal: 246,336
+
+INTEGRITY CHECKS
+row_count_unchanged: PASS
+alert_ids_unchanged_in_order: PASS
+priority_ranks_unchanged_in_order: PASS
+anomaly_scores_unchanged_in_order: PASS
+priority_scores_unchanged_in_order: PASS
+alert_id_unique: PASS
+
+TRACEABILITY
+- Original source/context columns are retained.
+- supervisory_review_reason_codes lists observed signals for each row.
+- supervisory_evidence_source_fields lists populated fields relevant to review.
+- Peer deviations and entity frequency are descriptive review indicators only.
+- Incident labels are not used in peer calculations.
+- V6 anomaly scores, priority scores, and ranks are not recalculated or changed.
+
+LIMITATIONS
+- This script cannot create missing source-system case IDs, escalation paths, remediation records, or asset criticality.
+- A populated support flag is not proof that the underlying external source record exists.
+- Validate sample findings against original SOC records before calling them confirmed findings.
+
+RESULT: PASS

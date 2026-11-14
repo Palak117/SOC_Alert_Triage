@@ -1,0 +1,352 @@
+{
+  "generated_at": "2026-11-14 17:01:07",
+  "cohort_size": 4,
+  "entities": {
+    "ORG-0004": {
+      "org_id": "ORG-0004",
+      "entity_name": "Defense & National Telecommunications",
+      "sector": "Defense / Telecom",
+      "tier": "Tier-1 Critical",
+      "date_range": "2024-07-29 19:54 to 2024-08-01 06:00",
+      "time_window_days": 2.4,
+      "total_alerts": 402335,
+      "critical_high_alerts": 20116,
+      "critical_high_pct": 5.0,
+      "mean_anomaly_score": -0.0798,
+      "evidence_gap_rate": 39.03,
+      "negative_space_rate": 5.14,
+      "execution_gap_rate": 96.68,
+      "vendor_diversity": 5,
+      "product_distribution": {
+        "AWS Instance Backup": 246336,
+        "Windows Logs": 92376,
+        "AWS VPC Security": 13368,
+        "Windows Active Directory": 3320,
+        "Falcon": 125,
+        "Duo": 10,
+        "Symantec Data Loss Prevention": 6
+      },
+      "historical_trends": [
+        {
+          "period": "Q1",
+          "start_time": "2024-07-29 19:54",
+          "end_time": "2024-07-29 21:10",
+          "alerts": 100584,
+          "execution_gap_pct": 88.51,
+          "evidence_gap_pct": 38.48,
+          "mean_anomaly_score": -0.0719
+        },
+        {
+          "period": "Q2",
+          "start_time": "2024-07-29 21:10",
+          "end_time": "2024-07-30 04:54",
+          "alerts": 100584,
+          "execution_gap_pct": 98.57,
+          "evidence_gap_pct": 40.63,
+          "mean_anomaly_score": -0.0749
+        },
+        {
+          "period": "Q3",
+          "start_time": "2024-07-30 04:54",
+          "end_time": "2024-07-31 03:21",
+          "alerts": 100584,
+          "execution_gap_pct": 99.83,
+          "evidence_gap_pct": 38.16,
+          "mean_anomaly_score": -0.0849
+        },
+        {
+          "period": "Q4",
+          "start_time": "2024-07-31 03:21",
+          "end_time": "2024-08-01 06:00",
+          "alerts": 100583,
+          "execution_gap_pct": 99.79,
+          "evidence_gap_pct": 38.87,
+          "mean_anomaly_score": -0.0876
+        }
+      ],
+      "scores": {
+        "Threat Detection": 92.5,
+        "Investigation & Evidence": 68.7,
+        "Escalation": 42.0,
+        "Incident Response": 25.6,
+        "Security Operations": 80.0,
+        "Governance & Oversight": 95.0,
+        "Operational Discipline": 45.7,
+        "Remediation": 20.0,
+        "Cyber Resilience Index": 63.1,
+        "Investigation": 68.7
+      },
+      "supervisory_risk_index": 36.9,
+      "audit_urgency": "TARGETED SUPERVISORY INQUIRY",
+      "cohort_robust_z": {
+        "evidence_gap_rate": -3.6,
+        "negative_space_rate": -0.68,
+        "execution_gap_rate": -0.66,
+        "supervisory_risk_index": -0.83,
+        "mean_anomaly_score": -1.22,
+        "vendor_diversity": -0.67
+      }
+    },
+    "ORG-0001": {
+      "org_id": "ORG-0001",
+      "entity_name": "National Power Grid Infrastructure",
+      "sector": "Energy & Power",
+      "tier": "Tier-1 Critical",
+      "date_range": "2024-07-26 11:10 to 2024-07-27 05:59",
+      "time_window_days": 0.8,
+      "total_alerts": 4968,
+      "critical_high_alerts": 250,
+      "critical_high_pct": 5.03,
+      "mean_anomaly_score": 0.0078,
+      "evidence_gap_rate": 96.14,
+      "negative_space_rate": 78.4,
+      "execution_gap_rate": 100.0,
+      "vendor_diversity": 5,
+      "product_distribution": {
+        "": 4531,
+        "Cisco Network Operating System": 192,
+        "Symantec Endpoint Protection": 127,
+        "Linux PAM": 108,
+        "Precinct": 10
+      },
+      "historical_trends": [
+        {
+          "period": "Q1",
+          "start_time": "2024-07-26 11:10",
+          "end_time": "2024-07-26 14:03",
+          "alerts": 1242,
+          "execution_gap_pct": 100.0,
+          "evidence_gap_pct": 95.89,
+          "mean_anomaly_score": 0.0021
+        },
+        {
+          "period": "Q2",
+          "start_time": "2024-07-26 14:03",
+          "end_time": "2024-07-26 19:46",
+          "alerts": 1242,
+          "execution_gap_pct": 100.0,
+          "evidence_gap_pct": 96.22,
+          "mean_anomaly_score": 0.0033
+        },
+        {
+          "period": "Q3",
+          "start_time": "2024-07-26 19:46",
+          "end_time": "2024-07-27 03:04",
+          "alerts": 1242,
+          "execution_gap_pct": 100.0,
+          "evidence_gap_pct": 96.62,
+          "mean_anomaly_score": 0.0139
+        },
+        {
+          "period": "Q4",
+          "start_time": "2024-07-27 03:04",
+          "end_time": "2024-07-27 05:59",
+          "alerts": 1242,
+          "execution_gap_pct": 100.0,
+          "evidence_gap_pct": 95.81,
+          "mean_anomaly_score": 0.0118
+        }
+      ],
+      "scores": {
+        "Threat Detection": 92.1,
+        "Investigation & Evidence": 20.0,
+        "Escalation": 40.0,
+        "Incident Response": 20.0,
+        "Security Operations": 80.0,
+        "Governance & Oversight": 37.3,
+        "Operational Discipline": 21.5,
+        "Remediation": 20.0,
+        "Cyber Resilience Index": 42.6,
+        "Investigation": 20.0
+      },
+      "supervisory_risk_index": 57.4,
+      "audit_urgency": "IMMEDIATE ON-SITE AUDIT",
+      "cohort_robust_z": {
+        "evidence_gap_rate": 0.63,
+        "negative_space_rate": 0.7,
+        "execution_gap_rate": 0.68,
+        "supervisory_risk_index": 1.19,
+        "mean_anomaly_score": 1.55,
+        "vendor_diversity": -0.67
+      }
+    },
+    "ORG-0003": {
+      "org_id": "ORG-0003",
+      "entity_name": "Central Banking & Financial Services",
+      "sector": "Financial / Banking",
+      "tier": "Tier-1 Critical",
+      "date_range": "2024-07-26 11:10 to 2024-07-26 13:56",
+      "time_window_days": 0.5,
+      "total_alerts": 50000,
+      "critical_high_alerts": 2500,
+      "critical_high_pct": 5.0,
+      "mean_anomaly_score": -0.0372,
+      "evidence_gap_rate": 97.26,
+      "negative_space_rate": 6.16,
+      "execution_gap_rate": 99.95,
+      "vendor_diversity": 6,
+      "product_distribution": {
+        "Windows Active Directory": 46283,
+        "": 2152,
+        "Linux PAM": 971,
+        "ManageEngine ADManager": 564,
+        "Duo": 29,
+        "SentinelOne": 1
+      },
+      "historical_trends": [
+        {
+          "period": "Q1",
+          "start_time": "2024-07-26 11:10",
+          "end_time": "2024-07-26 11:51",
+          "alerts": 12500,
+          "execution_gap_pct": 99.95,
+          "evidence_gap_pct": 97.42,
+          "mean_anomaly_score": -0.0379
+        },
+        {
+          "period": "Q2",
+          "start_time": "2024-07-26 11:51",
+          "end_time": "2024-07-26 11:54",
+          "alerts": 12500,
+          "execution_gap_pct": 99.91,
+          "evidence_gap_pct": 96.99,
+          "mean_anomaly_score": -0.0335
+        },
+        {
+          "period": "Q3",
+          "start_time": "2024-07-26 11:54",
+          "end_time": "2024-07-26 11:58",
+          "alerts": 12500,
+          "execution_gap_pct": 99.96,
+          "evidence_gap_pct": 97.7,
+          "mean_anomaly_score": -0.0392
+        },
+        {
+          "period": "Q4",
+          "start_time": "2024-07-26 11:58",
+          "end_time": "2024-07-26 13:56",
+          "alerts": 12500,
+          "execution_gap_pct": 99.98,
+          "evidence_gap_pct": 96.94,
+          "mean_anomaly_score": -0.038
+        }
+      ],
+      "scores": {
+        "Threat Detection": 92.5,
+        "Investigation & Evidence": 20.0,
+        "Escalation": 40.0,
+        "Incident Response": 76.1,
+        "Security Operations": 88.0,
+        "Governance & Oversight": 95.0,
+        "Operational Discipline": 21.1,
+        "Remediation": 65.5,
+        "Cyber Resilience Index": 60.0,
+        "Investigation": 20.0
+      },
+      "supervisory_risk_index": 40.0,
+      "audit_urgency": "TARGETED SUPERVISORY INQUIRY",
+      "cohort_robust_z": {
+        "evidence_gap_rate": 0.72,
+        "negative_space_rate": -0.66,
+        "execution_gap_rate": 0.66,
+        "supervisory_risk_index": -0.52,
+        "mean_anomaly_score": 0.12,
+        "vendor_diversity": 0.67
+      }
+    },
+    "ORG-0005": {
+      "org_id": "ORG-0005",
+      "entity_name": "Petroleum & Pipeline Control Systems",
+      "sector": "Oil, Gas & Energy",
+      "tier": "Tier-1 Critical",
+      "date_range": "2024-07-26 11:10 to 2024-07-26 12:10",
+      "time_window_days": 0.5,
+      "total_alerts": 50000,
+      "critical_high_alerts": 2500,
+      "critical_high_pct": 5.0,
+      "mean_anomaly_score": -0.045,
+      "evidence_gap_rate": 79.08,
+      "negative_space_rate": 76.6,
+      "execution_gap_rate": 80.72,
+      "vendor_diversity": 6,
+      "product_distribution": {
+        "VMWare VCenter": 22318,
+        "": 16529,
+        "ASA Firewall": 9644,
+        "Barracuda WAF": 1003,
+        "Windows Active Directory": 427,
+        "Graph": 37,
+        "Barracuda ESS": 33,
+        "Apache Web Server": 9
+      },
+      "historical_trends": [
+        {
+          "period": "Q1",
+          "start_time": "2024-07-26 11:10",
+          "end_time": "2024-07-26 11:25",
+          "alerts": 12500,
+          "execution_gap_pct": 83.32,
+          "evidence_gap_pct": 82.38,
+          "mean_anomaly_score": -0.0505
+        },
+        {
+          "period": "Q2",
+          "start_time": "2024-07-26 11:25",
+          "end_time": "2024-07-26 11:39",
+          "alerts": 12500,
+          "execution_gap_pct": 82.74,
+          "evidence_gap_pct": 79.42,
+          "mean_anomaly_score": -0.0456
+        },
+        {
+          "period": "Q3",
+          "start_time": "2024-07-26 11:39",
+          "end_time": "2024-07-26 11:52",
+          "alerts": 12500,
+          "execution_gap_pct": 80.18,
+          "evidence_gap_pct": 78.06,
+          "mean_anomaly_score": -0.0432
+        },
+        {
+          "period": "Q4",
+          "start_time": "2024-07-26 11:52",
+          "end_time": "2024-07-26 12:10",
+          "alerts": 12500,
+          "execution_gap_pct": 76.64,
+          "evidence_gap_pct": 76.45,
+          "mean_anomaly_score": -0.0408
+        }
+      ],
+      "scores": {
+        "Threat Detection": 92.5,
+        "Investigation & Evidence": 20.0,
+        "Escalation": 51.6,
+        "Incident Response": 37.7,
+        "Security Operations": 88.0,
+        "Governance & Oversight": 38.7,
+        "Operational Discipline": 36.1,
+        "Remediation": 20.0,
+        "Cyber Resilience Index": 49.4,
+        "Investigation": 20.0
+      },
+      "supervisory_risk_index": 50.6,
+      "audit_urgency": "IMMEDIATE ON-SITE AUDIT",
+      "cohort_robust_z": {
+        "evidence_gap_rate": -0.63,
+        "negative_space_rate": 0.66,
+        "execution_gap_rate": -5.0,
+        "supervisory_risk_index": 0.52,
+        "mean_anomaly_score": -0.12,
+        "vendor_diversity": 0.67
+      }
+    }
+  },
+  "cohort_medians": {
+    "evidence_gap_rate": 87.61,
+    "negative_space_rate": 41.38,
+    "execution_gap_rate": 98.31,
+    "supervisory_risk_index": 45.3,
+    "mean_anomaly_score": -0.04,
+    "vendor_diversity": 5.5
+  }
+}

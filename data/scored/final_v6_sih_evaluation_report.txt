@@ -1,0 +1,98 @@
+FINAL V6 SIH EVALUATION REPORT
+================================================================================
+
+DATASET SUMMARY
+Test alerts: 402,335
+Incident alerts: 3,113
+Incident rate: 0.7737%
+Unique incidents: 44
+
+MODEL
+Isolation Forest
+Unsupervised learning
+300 trees
+Random state = 42
+
+TOP-K RESULTS
+--------------------------------------------------------------------------------
+Top-100: V6 incidents=79, chronological incidents=0, V6 precision=79.00%, chronological precision=0.00%, V6 recall=2.54%, chronological recall=0.00%
+Top-500: V6 incidents=414, chronological incidents=0, V6 precision=82.80%, chronological precision=0.00%, V6 recall=13.30%, chronological recall=0.00%
+Top-1,000: V6 incidents=774, chronological incidents=0, V6 precision=77.40%, chronological precision=0.00%, V6 recall=24.86%, chronological recall=0.00%
+Top-5,000: V6 incidents=2,935, chronological incidents=0, V6 precision=58.70%, chronological precision=0.00%, V6 recall=94.28%, chronological recall=0.00%
+Top-10,000: V6 incidents=3,075, chronological incidents=1,040, V6 precision=30.75%, chronological precision=10.40%, V6 recall=98.78%, chronological recall=33.41%
+Top-25,000: V6 incidents=3,113, chronological incidents=2,915, V6 precision=12.45%, chronological precision=11.66%, V6 recall=100.00%, chronological recall=93.64%
+Top-50,000: V6 incidents=3,113, chronological incidents=2,965, V6 precision=6.23%, chronological precision=5.93%, V6 recall=100.00%, chronological recall=95.25%
+Top-100,000: V6 incidents=3,113, chronological incidents=2,995, V6 precision=3.11%, chronological precision=3.00%, V6 recall=100.00%, chronological recall=96.21%
+
+UNIQUE INCIDENT DISCOVERY
+--------------------------------------------------------------------------------
+Top-100: V6 unique incidents=24, chronological unique incidents=0, V6 unique recall=54.55%, chronological unique recall=0.00%
+Top-500: V6 unique incidents=33, chronological unique incidents=0, V6 unique recall=75.00%, chronological unique recall=0.00%
+Top-1,000: V6 unique incidents=38, chronological unique incidents=0, V6 unique recall=86.36%, chronological unique recall=0.00%
+Top-5,000: V6 unique incidents=44, chronological unique incidents=0, V6 unique recall=100.00%, chronological unique recall=0.00%
+Top-10,000: V6 unique incidents=44, chronological unique incidents=11, V6 unique recall=100.00%, chronological unique recall=25.00%
+Top-25,000: V6 unique incidents=44, chronological unique incidents=32, V6 unique recall=100.00%, chronological unique recall=72.73%
+Top-50,000: V6 unique incidents=44, chronological unique incidents=36, V6 unique recall=100.00%, chronological unique recall=81.82%
+Top-100,000: V6 unique incidents=44, chronological unique incidents=37, V6 unique recall=100.00%, chronological unique recall=84.09%
+
+REVIEW FRACTION
+--------------------------------------------------------------------------------
+Review 0.1%: 402 alerts reviewed, V6 discovered 33 unique incidents, V6 unique recall=75.00%, alerts avoided=99.90%
+Review 0.5%: 2,011 alerts reviewed, V6 discovered 43 unique incidents, V6 unique recall=97.73%, alerts avoided=99.50%
+Review 1.0%: 4,023 alerts reviewed, V6 discovered 43 unique incidents, V6 unique recall=97.73%, alerts avoided=99.00%
+Review 2.0%: 8,046 alerts reviewed, V6 discovered 44 unique incidents, V6 unique recall=100.00%, alerts avoided=98.00%
+Review 5.0%: 20,116 alerts reviewed, V6 discovered 44 unique incidents, V6 unique recall=100.00%, alerts avoided=95.00%
+Review 10.0%: 40,233 alerts reviewed, V6 discovered 44 unique incidents, V6 unique recall=100.00%, alerts avoided=90.00%
+Review 25.0%: 100,583 alerts reviewed, V6 discovered 44 unique incidents, V6 unique recall=100.00%, alerts avoided=75.00%
+
+FIRST INCIDENT DISCOVERY
+--------------------------------------------------------------------------------
+V6 minimum first rank: 3
+V6 mean first rank: 416.80
+V6 median first rank: 98.50
+V6 maximum first rank: 4,379
+Chronological minimum first rank: 6,445
+Chronological mean first rank: 44,498.91
+Chronological median first rank: 17,203.00
+Chronological maximum first rank: 209,160
+
+
+SAFETY / METHODOLOGY
+
+The V6 Isolation Forest was NOT retrained during evaluation.
+
+V6 anomaly scores were NOT modified.
+
+V6 priority scores were NOT modified.
+
+V6 priority ranking was NOT modified.
+
+incident_ids were used ONLY for post-hoc evaluation.
+
+No incident labels were used during:
+
+- feature engineering
+- model training
+- test scoring
+- anomaly-score calculation
+- priority-score creation
+- priority ranking
+
+No ground-truth information was used to create anomaly scores.
+
+No incident information was used to create priority rankings.
+
+_alert_id is only an identity / row-position key used to map
+scored alerts back to the original test rows during evaluation.
+
+_alert_id is NOT used as a model feature.
+
+The chronological queue is an independent baseline.
+
+The chronological baseline uses original timestamp order.
+
+Evaluation was performed only after the alerts were scored.
+
+The V6 model remains UNSUPERVISED.
+
+This evaluation does NOT change the production ranking.

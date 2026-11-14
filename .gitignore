@@ -1,0 +1,53 @@
+# Python environment and cache
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Raw and large datasets (>100MB) excluded from Git
+data/features/
+data/train_test/
+data/unsupervised_features/
+data/unsupervised_features_v6_leakage_reduced/
+data/behavioral_features/
+data/precinct6_cybersecurity.parquet
+data/soc_features/*.csv
+
+# Exclude uncompressed large CSVs in data/scored/ (>50MB / >100MB)
+data/scored/*.csv
+!data/scored/final_v6_sih_dashboard_summary.csv
+!data/scored/final_v6_sih_dashboard_incidents.csv
+!data/scored/final_v6_sih_dashboard_review_fractions.csv
+!data/scored/leakage_reduced_dashboard_summary.csv
+!data/scored/leakage_reduced_dashboard_incidents.csv
+!data/scored/leakage_reduced_review_fractions.csv
+!data/scored/leakage_reduced_vs_v6_comparison.csv
+!data/scored/incident_discovery_comparison.csv
+!data/scored/v6_vs_chronological_comparison.csv
+!data/scored/final_v6_sih_evaluation_summary.csv
+!data/scored/final_v6_review_fraction_summary.csv
+!data/scored/final_v6_unique_incident_summary.csv

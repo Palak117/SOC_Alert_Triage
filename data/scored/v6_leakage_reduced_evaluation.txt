@@ -1,0 +1,26 @@
+LEAKAGE-REDUCED MODEL — POST-HOC EVALUATION
+=================================================================
+Test alerts: 402,335
+Incident alerts: 3,113
+Unique incidents: 44
+
+TOP-K RANKING
+         K    Incident alerts     Precision@K   Unique incidents   Unique recall
+       100                 29          29.00%                  5          11.36%
+       500                165          33.00%                 13          29.55%
+     1,000                329          32.90%                 22          50.00%
+     5,000              1,221          24.42%                 34          77.27%
+    10,000              2,537          25.37%                 39          88.64%
+    25,000              3,113          12.45%                 44         100.00%
+    50,000              3,113           6.23%                 44         100.00%
+   100,000              3,113           3.11%                 44         100.00%
+
+REVIEW EFFORT
+  Review %    Alerts reviewed   Unique incidents    Alerts avoided
+      0.1%                403                 12            99.90%
+      0.5%              2,012                 33            99.50%
+      1.0%              4,024                 34            99.00%
+      2.0%              8,047                 38            98.00%
+      5.0%             20,117                 44            95.00%
+     10.0%             40,234                 44            90.00%
+     25.0%            100,584                 44            75.00%

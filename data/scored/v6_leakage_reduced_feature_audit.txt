@@ -1,0 +1,77 @@
+LEAKAGE-REDUCED FEATURE PROVENANCE AUDIT
+====================================================================
+Script reviewed: model\create_unsupervised_features_v6_leakage_reduced.py
+Training feature file: data\unsupervised_features_v6_leakage_reduced\X_train.csv
+Generated model features: 51
+
+GENERATED FEATURES
+01. hour
+02. day_of_week
+03. is_weekend
+04. hour_sin
+05. hour_cos
+06. dow_sin
+07. dow_cos
+08. src_port
+09. dst_port
+10. protocol
+11. src_port_category
+12. dst_port_category
+13. protocol_category
+14. same_port
+15. src_port_privileged
+16. dst_port_privileged
+17. has_src_ip
+18. has_dst_ip
+19. has_src_host
+20. has_dst_host
+21. message_length
+22. message_word_count
+23. message_digit_count
+24. message_special_count
+25. message_size_bucket
+26. has_username
+27. username_length
+28. pipeline_rarity
+29. product_name_rarity
+30. vendor_name_rarity
+31. message_type_rarity
+32. stream_name_rarity
+33. action_rarity
+34. severity_rarity
+35. network_behavior_rarity
+36. high_level_behavior_rarity
+37. src_ip_previous_count
+38. src_ip_first_seen
+39. src_host_previous_count
+40. src_host_first_seen
+41. username_previous_count
+42. username_first_seen
+43. product_name_previous_count
+44. product_name_first_seen
+45. message_type_previous_count
+46. message_type_first_seen
+47. pipeline_previous_count
+48. pipeline_first_seen
+49. behavior_previous_count
+50. behavior_first_seen
+51. _alert_id
+
+SENSITIVE-FIELD SOURCE SCAN
+A match means the term occurs in source text; it does not alone prove leakage.
+No match is not proof that every transformation is safe.
+
+No searched sensitive terms were found in the feature-generation source.
+
+KNOWN SAFEGUARDS
+- The separate feature script removes suspicion_score and lifecycle_stage rarity.
+- The new model was fitted only on the generated numeric feature matrix.
+- Incident IDs are used for post-hoc evaluation, not model.fit().
+- The experiment uses separate files and does not overwrite the original V6 model.
+
+LIMITATIONS / REQUIRED MANUAL REVIEW
+- Review each matching source line and the function that creates its feature.
+- Verify every feature is available at alert triage time, not only after investigation or closure.
+- Historical counts and rarity statistics must use only prior alerts or training-derived statistics.
+- Static text scanning cannot establish full data lineage or prove leakage-free behavior.
+- Treat this as a leakage-reduced experiment, not a certified leakage-free model.

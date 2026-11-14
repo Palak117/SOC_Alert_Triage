@@ -1,0 +1,562 @@
+[
+  {
+    "prediction_id": "live_20261114_180517_6b7b762c",
+    "timestamp": "2026-11-14 18:05:17",
+    "input_hash": "6b7b762c6c45bbd77936bbd8e53f6c3032fd05907aed5b4c2862f3311f9d04ca",
+    "model_used": "baseline",
+    "anomaly_score": 0.099587,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.45,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "Empty message body (zero narrative context)",
+      "High evidence gap (4 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Missing user/account identity",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "username",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "<script>alert('xss')</script>",
+      "severity": "UNKNOWN_VALUE_12345",
+      "pipeline": null,
+      "product_name": "",
+      "message_length": -9999
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180517_ec8cb578",
+    "timestamp": "2026-11-14 18:05:17",
+    "input_hash": "ec8cb5782232a595d4f9abb4441785dd30183dabaef53a3ac37ccf55cac53f1d",
+    "model_used": "baseline",
+    "anomaly_score": 0.061379,
+    "priority_label": "High",
+    "relative_tier": "Top 5% Elevated Risk",
+    "score_z_score": 2.71,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (6 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing source IP address",
+      "Missing destination IP address",
+      "Missing user/account identity",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)",
+      "Missing raw severity rating (defaulted to Informational)"
+    ],
+    "missing_fields": [
+      "src_ip",
+      "dst_ip",
+      "username",
+      "src_port",
+      "dst_port",
+      "severity"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "message": "Short log with missing host and IP"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180517_335aa624",
+    "timestamp": "2026-11-14 18:05:17",
+    "input_hash": "335aa6240f0a86eaa1e787cd4de2a8cbc55310b8ef25a75b3566a8168f1868a2",
+    "model_used": "leakage_reduced",
+    "anomaly_score": 0.10035,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.46,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (3 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "192.168.1.105",
+      "src_host": "srv-prod-ad01",
+      "username": "admin_svc",
+      "pipeline": "windows logs",
+      "product_name": "windows active directory",
+      "message_type": "4662",
+      "action": "allowed",
+      "severity": "medium",
+      "message": "An operation was performed on an Active Directory object with elevated credentials.",
+      "network_behavior": "directory_service_access",
+      "high_level_behavior": "credential_access"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180516_335aa624",
+    "timestamp": "2026-11-14 18:05:17",
+    "input_hash": "335aa6240f0a86eaa1e787cd4de2a8cbc55310b8ef25a75b3566a8168f1868a2",
+    "model_used": "baseline",
+    "anomaly_score": 0.095244,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.37,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (3 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "192.168.1.105",
+      "src_host": "srv-prod-ad01",
+      "username": "admin_svc",
+      "pipeline": "windows logs",
+      "product_name": "windows active directory",
+      "message_type": "4662",
+      "action": "allowed",
+      "severity": "medium",
+      "message": "An operation was performed on an Active Directory object with elevated credentials.",
+      "network_behavior": "directory_service_access",
+      "high_level_behavior": "credential_access"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180424_6b7b762c",
+    "timestamp": "2026-11-14 18:04:24",
+    "input_hash": "6b7b762c6c45bbd77936bbd8e53f6c3032fd05907aed5b4c2862f3311f9d04ca",
+    "model_used": "baseline",
+    "anomaly_score": 0.099587,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.45,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "Empty message body (zero narrative context)",
+      "High evidence gap (4 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Missing user/account identity",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "username",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "<script>alert('xss')</script>",
+      "severity": "UNKNOWN_VALUE_12345",
+      "pipeline": null,
+      "product_name": "",
+      "message_length": -9999
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180424_ec8cb578",
+    "timestamp": "2026-11-14 18:04:24",
+    "input_hash": "ec8cb5782232a595d4f9abb4441785dd30183dabaef53a3ac37ccf55cac53f1d",
+    "model_used": "baseline",
+    "anomaly_score": 0.061379,
+    "priority_label": "High",
+    "relative_tier": "Top 5% Elevated Risk",
+    "score_z_score": 2.71,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (6 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing source IP address",
+      "Missing destination IP address",
+      "Missing user/account identity",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)",
+      "Missing raw severity rating (defaulted to Informational)"
+    ],
+    "missing_fields": [
+      "src_ip",
+      "dst_ip",
+      "username",
+      "src_port",
+      "dst_port",
+      "severity"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "message": "Short log with missing host and IP"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180424_335aa624",
+    "timestamp": "2026-11-14 18:04:24",
+    "input_hash": "335aa6240f0a86eaa1e787cd4de2a8cbc55310b8ef25a75b3566a8168f1868a2",
+    "model_used": "leakage_reduced",
+    "anomaly_score": 0.10035,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.46,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (3 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "192.168.1.105",
+      "src_host": "srv-prod-ad01",
+      "username": "admin_svc",
+      "pipeline": "windows logs",
+      "product_name": "windows active directory",
+      "message_type": "4662",
+      "action": "allowed",
+      "severity": "medium",
+      "message": "An operation was performed on an Active Directory object with elevated credentials.",
+      "network_behavior": "directory_service_access",
+      "high_level_behavior": "credential_access"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180423_335aa624",
+    "timestamp": "2026-11-14 18:04:24",
+    "input_hash": "335aa6240f0a86eaa1e787cd4de2a8cbc55310b8ef25a75b3566a8168f1868a2",
+    "model_used": "baseline",
+    "anomaly_score": 0.095244,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.37,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (3 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "192.168.1.105",
+      "src_host": "srv-prod-ad01",
+      "username": "admin_svc",
+      "pipeline": "windows logs",
+      "product_name": "windows active directory",
+      "message_type": "4662",
+      "action": "allowed",
+      "severity": "medium",
+      "message": "An operation was performed on an Active Directory object with elevated credentials.",
+      "network_behavior": "directory_service_access",
+      "high_level_behavior": "credential_access"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180411_6b7b762c",
+    "timestamp": "2026-11-14 18:04:11",
+    "input_hash": "6b7b762c6c45bbd77936bbd8e53f6c3032fd05907aed5b4c2862f3311f9d04ca",
+    "model_used": "baseline",
+    "anomaly_score": 0.099587,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.45,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "Empty message body (zero narrative context)",
+      "High evidence gap (4 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Missing user/account identity",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "username",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "<script>alert('xss')</script>",
+      "severity": "UNKNOWN_VALUE_12345",
+      "pipeline": null,
+      "product_name": "",
+      "message_length": -9999
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180411_ec8cb578",
+    "timestamp": "2026-11-14 18:04:11",
+    "input_hash": "ec8cb5782232a595d4f9abb4441785dd30183dabaef53a3ac37ccf55cac53f1d",
+    "model_used": "baseline",
+    "anomaly_score": 0.061379,
+    "priority_label": "High",
+    "relative_tier": "Top 5% Elevated Risk",
+    "score_z_score": 2.71,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (6 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing source IP address",
+      "Missing destination IP address",
+      "Missing user/account identity",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)",
+      "Missing raw severity rating (defaulted to Informational)"
+    ],
+    "missing_fields": [
+      "src_ip",
+      "dst_ip",
+      "username",
+      "src_port",
+      "dst_port",
+      "severity"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "message": "Short log with missing host and IP"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180411_335aa624",
+    "timestamp": "2026-11-14 18:04:11",
+    "input_hash": "335aa6240f0a86eaa1e787cd4de2a8cbc55310b8ef25a75b3566a8168f1868a2",
+    "model_used": "leakage_reduced",
+    "anomaly_score": 0.10035,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.46,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (3 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "192.168.1.105",
+      "src_host": "srv-prod-ad01",
+      "username": "admin_svc",
+      "pipeline": "windows logs",
+      "product_name": "windows active directory",
+      "message_type": "4662",
+      "action": "allowed",
+      "severity": "medium",
+      "message": "An operation was performed on an Active Directory object with elevated credentials.",
+      "network_behavior": "directory_service_access",
+      "high_level_behavior": "credential_access"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180410_335aa624",
+    "timestamp": "2026-11-14 18:04:11",
+    "input_hash": "335aa6240f0a86eaa1e787cd4de2a8cbc55310b8ef25a75b3566a8168f1868a2",
+    "model_used": "baseline",
+    "anomaly_score": 0.095244,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.37,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (3 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "192.168.1.105",
+      "src_host": "srv-prod-ad01",
+      "username": "admin_svc",
+      "pipeline": "windows logs",
+      "product_name": "windows active directory",
+      "message_type": "4662",
+      "action": "allowed",
+      "severity": "medium",
+      "message": "An operation was performed on an Active Directory object with elevated credentials.",
+      "network_behavior": "directory_service_access",
+      "high_level_behavior": "credential_access"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180344_ec8cb578",
+    "timestamp": "2026-11-14 18:03:44",
+    "input_hash": "ec8cb5782232a595d4f9abb4441785dd30183dabaef53a3ac37ccf55cac53f1d",
+    "model_used": "baseline",
+    "anomaly_score": 0.061379,
+    "priority_label": "High",
+    "relative_tier": "Top 5% Elevated Risk",
+    "score_z_score": 2.71,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (6 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing source IP address",
+      "Missing destination IP address",
+      "Missing user/account identity",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)",
+      "Missing raw severity rating (defaulted to Informational)"
+    ],
+    "missing_fields": [
+      "src_ip",
+      "dst_ip",
+      "username",
+      "src_port",
+      "dst_port",
+      "severity"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "message": "Short log with missing host and IP"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180344_335aa624",
+    "timestamp": "2026-11-14 18:03:44",
+    "input_hash": "335aa6240f0a86eaa1e787cd4de2a8cbc55310b8ef25a75b3566a8168f1868a2",
+    "model_used": "leakage_reduced",
+    "anomaly_score": 0.10035,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.46,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (3 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "192.168.1.105",
+      "src_host": "srv-prod-ad01",
+      "username": "admin_svc",
+      "pipeline": "windows logs",
+      "product_name": "windows active directory",
+      "message_type": "4662",
+      "action": "allowed",
+      "severity": "medium",
+      "message": "An operation was performed on an Active Directory object with elevated credentials.",
+      "network_behavior": "directory_service_access",
+      "high_level_behavior": "credential_access"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  },
+  {
+    "prediction_id": "live_20261114_180343_335aa624",
+    "timestamp": "2026-11-14 18:03:44",
+    "input_hash": "335aa6240f0a86eaa1e787cd4de2a8cbc55310b8ef25a75b3566a8168f1868a2",
+    "model_used": "baseline",
+    "anomaly_score": 0.095244,
+    "priority_label": "Critical",
+    "relative_tier": "Top 1% Most Anomalous",
+    "score_z_score": 3.37,
+    "is_unusual_vs_reference": true,
+    "contributing_reasons": [
+      "High evidence gap (3 fields absent)"
+    ],
+    "data_quality_warnings": [
+      "Missing destination IP address",
+      "Unspecified source port (set to 0)",
+      "Unspecified destination port (set to 0)"
+    ],
+    "missing_fields": [
+      "dst_ip",
+      "src_port",
+      "dst_port"
+    ],
+    "stripped_ground_truth_fields": [],
+    "raw_input": {
+      "src_ip": "192.168.1.105",
+      "src_host": "srv-prod-ad01",
+      "username": "admin_svc",
+      "pipeline": "windows logs",
+      "product_name": "windows active directory",
+      "message_type": "4662",
+      "action": "allowed",
+      "severity": "medium",
+      "message": "An operation was performed on an Active Directory object with elevated credentials.",
+      "network_behavior": "directory_service_access",
+      "high_level_behavior": "credential_access"
+    },
+    "regulatory_disclaimer": "Model-generated anomaly score reflects statistical rarity relative to baseline telemetry, NOT confirmed maliciousness. Analyst validation required."
+  }
+]
