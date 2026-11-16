@@ -9,7 +9,8 @@ import numpy as np
 import json
 import html
 import ipaddress
-from typing import Optional, Any
+import re
+from typing import Optional, Any, Dict, List
 from pathlib import Path
 from dashboard.ui_theme import (
     render_command_header,
@@ -52,6 +53,99 @@ def validate_evidence_field(field_name: str, value: Any) -> bool:
         except (ValueError, TypeError):
             return False
     return True
+
+def extract_endpoint_telemetry(row: pd.Series) -> Dict[str, Any]:
+    """
+    Extracts deep endpoint telemetry from raw message payloads (e.g., CrowdStrike Falcon JSON).
+    Distinguishes endpoint workstation identities, sensor event times, and micro-behavior
+    ATT&CK techniques from SIEM-level correlation and relay envelopes.
+    """
+    msg = str(row.get("message_sanitized", row.get("message", ""))).strip()
+    res: Dict[str, Any] = {
+        "endpoint_host": None,
+        "endpoint_timestamp": None,
+        "endpoint_tactics": [],
+        "endpoint_techniques": [],
+        "raw_json_parsed": False,
+    }
+    if not msg:
+        return res
+
+    # 1. Regex search for clientHostname=
+    m_host = re.search(r"clientHostname=([^\s:]+)", msg)
+    if m_host:
+        h_val = m_host.group(1).strip()
+        if h_val and h_val.lower() not in MISSING_EVIDENCE_SENTINELS:
+            res["endpoint_host"] = h_val
+
+    # 2. Extract embedded JSON payload if present
+    m_json = re.search(r"message=(\{.*\})(?:\s*:::\s*|\s*$)", msg)
+    json_str = m_json.group(1) if m_json else (msg if msg.startswith("{") and msg.endswith("}") else None)
+
+    if json_str:
+        try:
+            d = json.loads(json_str)
+            res["raw_json_parsed"] = True
+            dev = d.get("device", {})
+            if isinstance(dev, dict) and dev.get("hostname"):
+                h_dev = str(dev.get("hostname")).strip()
+                if h_dev and h_dev.lower() not in MISSING_EVIDENCE_SENTINELS and not res["endpoint_host"]:
+                    res["endpoint_host"] = h_dev
+
+            if d.get("first_behavior"):
+                res["endpoint_timestamp"] = str(d.get("first_behavior")).strip()
+            elif d.get("created_timestamp"):
+                res["endpoint_timestamp"] = str(d.get("created_timestamp")).strip()
+
+            behaviors = d.get("behaviors", [])
+            if isinstance(behaviors, list):
+                for b in behaviors:
+                    if isinstance(b, dict):
+                        tac_id = b.get("tactic_id")
+                        tac_name = b.get("tactic")
+                        tec_id = b.get("technique_id")
+                        tec_name = b.get("technique")
+                        b_ts = b.get("timestamp")
+                        if b_ts and not res["endpoint_timestamp"]:
+                            res["endpoint_timestamp"] = str(b_ts).strip()
+                        if tac_id:
+                            item = f"{tac_id} — {tac_name}" if tac_name else str(tac_id)
+                            if item not in res["endpoint_tactics"]:
+                                res["endpoint_tactics"].append(item)
+                        elif tac_name and tac_name not in res["endpoint_tactics"]:
+                            res["endpoint_tactics"].append(str(tac_name))
+
+                        if tec_id:
+                            item = f"{tec_id} — {tec_name}" if tec_name else str(tec_id)
+                            if item not in res["endpoint_techniques"]:
+                                res["endpoint_techniques"].append(item)
+                        elif tec_name and tec_name not in res["endpoint_techniques"]:
+                            res["endpoint_techniques"].append(str(tec_name))
+        except Exception:
+            pass
+
+    # 3. Fallback regex for timestamp if json.loads failed or was truncated
+    if not res["endpoint_timestamp"]:
+        m_ts = re.search(r'"timestamp":\s*"(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d[^"]*)"', msg)
+        if m_ts:
+            res["endpoint_timestamp"] = m_ts.group(1).strip()
+
+    # 4. Fallback regex for tactics/techniques
+    if not res["endpoint_tactics"]:
+        t_matches = re.findall(r'"tactic":\s*"([^"]+)",\s*"tactic_id":\s*"(TA\d{4})"', msg)
+        for tname, tid in t_matches:
+            item = f"{tid} — {tname}"
+            if item not in res["endpoint_tactics"]:
+                res["endpoint_tactics"].append(item)
+
+    if not res["endpoint_techniques"]:
+        te_matches = re.findall(r'"technique":\s*"([^"]+)",\s*"technique_id":\s*"(T\d{4}(?:\.\d{3})?)"', msg)
+        for tename, teid in te_matches:
+            item = f"{teid} — {tename}"
+            if item not in res["endpoint_techniques"]:
+                res["endpoint_techniques"].append(item)
+
+    return res
 
 def render_alert_investigation_view(
     alerts: pd.DataFrame,
@@ -196,6 +290,8 @@ def render_alert_investigation_view(
         return
 
     row = selected.iloc[0]
+    ep_telemetry = extract_endpoint_telemetry(row)
+    ingest_time = str(row.get("Timestamp", row.get("timestamp_datetime", "N/A")))
 
     # Display on-demand query banner if fetched directly from disk
     if is_ondemand_query:
@@ -235,19 +331,39 @@ def render_alert_investigation_view(
         )
     with h3:
         is_inc = row.get("actual_incident") == 1
+        is_susp_mitre = (
+            row.get("is_suspicious_mitre") == 1
+            or row.get("security_relevant") == 1
+            or str(row.get("label_binary", "")).lower() == "suspicious"
+        )
+        if is_inc:
+            gt_val = "🚨 Confirmed Incident"
+            gt_delta_type = "positive"
+            gt_sub = "Verified post-hoc ticketing record"
+        elif is_susp_mitre:
+            gt_val = "⚠️ Unticketed / Security Relevant"
+            gt_delta_type = "warning"
+            gt_sub = "Suspicious activity without formal incident ticket"
+        else:
+            gt_val = "🛡️ No Confirmed Incident Ticket"
+            gt_delta_type = "neutral"
+            gt_sub = "No post-hoc incident ticket linked"
+
         render_kpi_card(
             title="Ground Truth Incident",
-            value="🚨 Confirmed Incident" if is_inc else "🛡️ Benign Baseline",
-            subtitle="Verified post-hoc ticketing record",
+            value=gt_val,
+            subtitle=gt_sub,
             delta=f"Ticket: {esc(row.get('incident_ids', 'None'))}",
-            delta_type="positive" if is_inc else "neutral"
+            delta_type=gt_delta_type
         )
     with h4:
+        endpoint_ts = ep_telemetry.get("endpoint_timestamp")
+        delta_str = f"Sensor Event: {endpoint_ts}" if endpoint_ts else "UTC Synchronized"
         render_kpi_card(
-            title="Detection Timestamp",
-            value=str(row.get("Timestamp", row.get("timestamp_datetime", "N/A"))),
-            subtitle="Telemetry event timestamp",
-            delta="UTC Synchronized",
+            title="SIEM Ingestion Time",
+            value=ingest_time,
+            subtitle="Pipeline ingestion timestamp",
+            delta=delta_str,
             delta_type="neutral"
         )
 
@@ -264,6 +380,14 @@ def render_alert_investigation_view(
 
     # Col 1: Asset & Identity
     with fc1:
+        ep_host_html = ""
+        if ep_telemetry.get("endpoint_host"):
+            ep_host_html = f"<div style='margin-bottom:8px;'><strong>Endpoint Workstation Host:</strong> <code>{esc(ep_telemetry.get('endpoint_host'))}</code></div>"
+
+        ep_ts_html = ""
+        if ep_telemetry.get("endpoint_timestamp"):
+            ep_ts_html = f"<div style='margin-bottom:8px;'><strong>Endpoint Sensor Event Time:</strong> <code>{esc(ep_telemetry.get('endpoint_timestamp'))}</code></div>"
+
         st.markdown(
             f"""
             <div class="cyber-card" style="height: 100%;">
@@ -272,9 +396,12 @@ def render_alert_investigation_view(
                 <div style="margin-bottom:8px;"><strong>Destination Asset:</strong> <code>{esc(row.get('dst_ip'))}:{esc(row.get('dst_port', '0'))}</code></div>
                 <div style="margin-bottom:8px;"><strong>Transport Protocol:</strong> <code>{esc(row.get('protocol'))}</code></div>
                 <div style="margin-bottom:8px;"><strong>Target User / Account:</strong> <code>{esc(row.get('username'))}</code></div>
-                <div style="margin-bottom:8px;"><strong>Source Host:</strong> <code>{esc(row.get('src_host'))}</code></div>
+                <div style="margin-bottom:8px;"><strong>Collector / Relay Host:</strong> <code>{esc(row.get('src_host'))}</code></div>
+                {ep_host_html}
                 <div style="margin-bottom:8px;"><strong>Destination Host:</strong> <code>{esc(row.get('dst_host'))}</code></div>
                 <div style="margin-bottom:8px;"><strong>Origin Node:</strong> <code>{esc(row.get('origin'))}</code></div>
+                <div style="margin-bottom:8px;"><strong>SIEM Ingestion Time:</strong> <code>{esc(ingest_time)}</code></div>
+                {ep_ts_html}
             </div>
             """,
             unsafe_allow_html=True
@@ -341,8 +468,8 @@ def render_alert_investigation_view(
 
     # 4. MITRE ATT&CK Matrix & Raw Telemetry
     render_section_header(
-        title="MITRE ATT&CK Mapping & Rule Signatures",
-        subtitle="Adversarial tactics and techniques attributed to this alert telemetry.",
+        title="SIEM Correlation & Endpoint ATT&CK Mapping",
+        subtitle="Multi-layer adversarial tactics and techniques attributed across SIEM rules and EDR sensors.",
         badge="MITRE FRAMEWORK"
     )
 
@@ -350,16 +477,41 @@ def render_alert_investigation_view(
     m_techniques = str(row.get("attack_techniques", row.get("mitre_technique", "N/A")))
     m_rules = str(row.get("matched_rules", "N/A"))
 
+    ep_tactics_list = ep_telemetry.get("endpoint_tactics", [])
+    ep_techniques_list = ep_telemetry.get("endpoint_techniques", [])
+    ep_tactics_str = ", ".join(ep_tactics_list) if ep_tactics_list else ""
+    ep_techniques_str = ", ".join(ep_techniques_list) if ep_techniques_list else ""
+    has_ep_attck = bool(ep_tactics_str or ep_techniques_str)
+
+    endpoint_attck_html = ""
+    if has_ep_attck:
+        endpoint_attck_html = f"""
+            <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(244,114,182,0.2); display:flex; gap:20px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:240px;">
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:#F472B6; font-weight:600;">Endpoint Sensor ATT&CK Tactics</span>
+                    <div style="font-size:1.02rem; font-weight:700; color:#FDF2F8; margin-top:3px;">🎯 {esc(ep_tactics_str if ep_tactics_str else 'N/A')}</div>
+                </div>
+                <div style="flex:1; min-width:240px;">
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:#F472B6; font-weight:600;">Endpoint Sensor ATT&CK Techniques</span>
+                    <div style="font-size:1.02rem; font-weight:700; color:#F472B6; margin-top:3px;">⚡ {esc(ep_techniques_str if ep_techniques_str else 'N/A')}</div>
+                </div>
+                <div style="flex:2; min-width:300px;">
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:#94A3B8; font-weight:600;">Telemetry Source Attribution</span>
+                    <div style="font-size:0.85rem; color:#E2E8F0; margin-top:3px;">Parsed directly from local EDR endpoint micro-behavior sensor stream.</div>
+                </div>
+            </div>
+        """
+
     st.markdown(
         f"""
         <div class="cyber-card">
             <div style="display:flex; gap:20px; flex-wrap:wrap;">
                 <div style="flex:1; min-width:240px;">
-                    <span style="font-size:0.75rem; text-transform:uppercase; color:#94A3B8; font-weight:600;">MITRE ATT&CK Tactics</span>
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:#94A3B8; font-weight:600;">SIEM Correlation ATT&CK Tactics</span>
                     <div style="font-size:1.05rem; font-weight:700; color:#F8FAFC; margin-top:3px;">🛡️ {esc(m_tactics)}</div>
                 </div>
                 <div style="flex:1; min-width:240px;">
-                    <span style="font-size:0.75rem; text-transform:uppercase; color:#94A3B8; font-weight:600;">MITRE ATT&CK Techniques</span>
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:#94A3B8; font-weight:600;">SIEM Correlation ATT&CK Techniques</span>
                     <div style="font-size:1.05rem; font-weight:700; color:#38BDF8; margin-top:3px;">⚡ {esc(m_techniques)}</div>
                 </div>
                 <div style="flex:2; min-width:300px;">
@@ -367,6 +519,7 @@ def render_alert_investigation_view(
                     <div style="font-size:0.88rem; font-family:'JetBrains Mono', monospace; color:#C4B5FD; margin-top:3px;">{esc(m_rules)}</div>
                 </div>
             </div>
+            {endpoint_attck_html}
             <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(56,189,248,0.12); font-size:0.85rem; color:#E2E8F0;">
                 <strong>Alert Message Payload:</strong> {esc(row.get('message_sanitized', 'No raw message payload available'))}
             </div>
