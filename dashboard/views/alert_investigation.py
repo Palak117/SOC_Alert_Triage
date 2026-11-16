@@ -349,11 +349,28 @@ def render_alert_investigation_view(
             gt_delta_type = "neutral"
             gt_sub = "No post-hoc incident ticket linked"
 
+        # Format incident ticket cleanly: display 'None' if empty/null/[]
+        raw_ticket = row.get("incident_ids")
+        if raw_ticket is None:
+            ticket_str = "None"
+        elif isinstance(raw_ticket, (list, tuple, set, np.ndarray)):
+            valid_tickets = [str(t).strip() for t in raw_ticket if str(t).strip() and str(t).strip().lower() not in MISSING_EVIDENCE_SENTINELS]
+            ticket_str = ", ".join(valid_tickets) if valid_tickets else "None"
+        elif pd.isna(raw_ticket):
+            ticket_str = "None"
+        else:
+            s_ticket = str(raw_ticket).strip()
+            if not s_ticket or s_ticket.lower() in MISSING_EVIDENCE_SENTINELS:
+                ticket_str = "None"
+            else:
+                cleaned_ticket = s_ticket.strip("[]'\"").strip()
+                ticket_str = cleaned_ticket if (cleaned_ticket and cleaned_ticket.lower() not in MISSING_EVIDENCE_SENTINELS) else "None"
+
         render_kpi_card(
             title="Ground Truth Incident",
             value=gt_val,
             subtitle=gt_sub,
-            delta=f"Ticket: {esc(row.get('incident_ids', 'None'))}",
+            delta=f"Ticket: {esc(ticket_str)}",
             delta_type=gt_delta_type
         )
     with h4:
@@ -419,7 +436,7 @@ def render_alert_investigation_view(
         if pd.isna(row.get("username")) or str(row.get("username")).strip() == "":
             reasons.append("Unauthenticated identity signature (missing username)")
         if row.get("actual_incident") == 1:
-            reasons.append(f"Linked to confirmed security incident ticket {esc(row.get('incident_ids'))}")
+            reasons.append(f"Linked to confirmed security incident ticket {esc(ticket_str)}")
 
         reasons_html = "".join([f"<li style='margin-bottom:6px; color:#F8FAFC;'>⚠️ {r}</li>" for r in reasons]) if reasons else "<li style='color:#94A3B8;'>Normal baseline operational telemetry.</li>"
 
@@ -475,7 +492,23 @@ def render_alert_investigation_view(
 
     m_tactics = str(row.get("attack_tactics", row.get("mitre_tactic", "N/A")))
     m_techniques = str(row.get("attack_techniques", row.get("mitre_technique", "N/A")))
-    m_rules = str(row.get("matched_rules", "N/A"))
+
+    # Format matched SIEM rules cleanly: if missing, display 'No normalized detection rule supplied'
+    raw_rules = row.get("matched_rules")
+    if raw_rules is None:
+        m_rules = "No normalized detection rule supplied"
+    elif isinstance(raw_rules, (list, tuple, set, np.ndarray)):
+        rules_list = [str(r).strip() for r in raw_rules if str(r).strip() and str(r).strip().lower() not in MISSING_EVIDENCE_SENTINELS]
+        m_rules = ", ".join(rules_list) if rules_list else "No normalized detection rule supplied"
+    elif pd.isna(raw_rules):
+        m_rules = "No normalized detection rule supplied"
+    else:
+        s_rules = str(raw_rules).strip()
+        if not s_rules or s_rules.lower() in MISSING_EVIDENCE_SENTINELS:
+            m_rules = "No normalized detection rule supplied"
+        else:
+            cleaned_rules = s_rules.strip("[]'\"").strip()
+            m_rules = cleaned_rules if (cleaned_rules and cleaned_rules.lower() not in MISSING_EVIDENCE_SENTINELS) else "No normalized detection rule supplied"
 
     ep_tactics_list = ep_telemetry.get("endpoint_tactics", [])
     ep_techniques_list = ep_telemetry.get("endpoint_techniques", [])

@@ -67,6 +67,24 @@ Evaluated on the full held-out test split of **402,335 alerts** containing **3,1
 
 ---
 
+## Dataset Source & Attribution
+
+SAT-SA is evaluated using the **WitFoo Precinct6 Cybersecurity Dataset**, an open corpus of cybersecurity telemetry and Security Operations Center (SOC) events.
+
+* **Dataset Name:** [WitFoo Precinct6 Cybersecurity Dataset](https://huggingface.co/datasets/witfoo/precinct6-cybersecurity)
+* **Dataset Publisher:** WitFoo
+* **Official Repository:** [https://huggingface.co/datasets/witfoo/precinct6-cybersecurity](https://huggingface.co/datasets/witfoo/precinct6-cybersecurity)
+* **License:** Apache License 2.0 (as stated by the dataset publisher)
+* **Dataset Size:** 2,011,674 security events, as documented by the source
+* **Description:** Diverse cybersecurity telemetry and SOC security events across multiple infrastructure pipelines, security appliances, network flows, and endpoint sensor feeds.
+
+### Evaluation Scoping in SAT-SA
+* **Held-Out Evaluation Entity:** SAT-SA utilizes **ORG-0004** (Defense & National Telecommunications) as its strictly held-out evaluation entity, representing 402,335 alerts in the final 20% chronological test partition (containing 3,113 incident-associated alerts linked to 44 confirmed incidents).
+* **Framework Utilization:** The dataset is used for alert analysis, unsupervised Isolation Forest anomaly detection, operational triage prioritization, and empirical recall/precision evaluation.
+* **Provenance & Mirror Verification:** The primary dataset download pipeline ([download_dataset.py](download_dataset.py)) pulls the `signals` partition directly from the official repository `witfoo/precinct6-cybersecurity` (with historical repository documentation also noting mirror availability at `siddhant-tiwari/precinct6_cybersecurity`). Pre-consolidated, compressed test parquets are bundled in `data/scored/` for immediate out-of-the-box execution.
+
+---
+
 ## 4. Repository Structure
 
 ```text
