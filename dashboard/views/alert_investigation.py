@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import json
 import html
+import ipaddress
 from typing import Optional, Any
 from pathlib import Path
 from dashboard.ui_theme import (
@@ -24,6 +25,33 @@ def esc(val, default="N/A"):
         return default
     s = str(val).strip()
     return html.escape(s) if s else default
+
+MISSING_EVIDENCE_SENTINELS = frozenset({
+    "none", "nan", "null", "n/a", "na", "[]", "{}", "-", "--",
+    "unknown", "<none>", "<na>", "<null>"
+})
+
+def validate_evidence_field(field_name: str, value: Any) -> bool:
+    """
+    Validate evidence field completeness and format for Evidence Quality Audit.
+    Returns True if the field is populated and passes format checks (Verified),
+    or False if it represents a missing, unusable, or malformed value (Missing Evidence Gap).
+    """
+    if value is None or pd.isna(value):
+        return False
+    s_val = str(value).strip()
+    if not s_val:
+        return False
+    if s_val.lower() in MISSING_EVIDENCE_SENTINELS:
+        return False
+    # Validate IP address format strictly for IP fields
+    if field_name in ("Source IP", "Destination IP", "src_ip", "dst_ip"):
+        try:
+            ipaddress.ip_address(s_val)
+            return True
+        except (ValueError, TypeError):
+            return False
+    return True
 
 def render_alert_investigation_view(
     alerts: pd.DataFrame,
@@ -52,28 +80,44 @@ def render_alert_investigation_view(
 
     if total_corpus_alerts and total_corpus_alerts > 0:
         max_id = max(int(num_s.max() or 0), total_corpus_alerts - 1)
-        min_id = 0
+        min_id = min(int(num_s.min() or 0), 0) if not num_s.empty else 0
     elif is_all_numeric:
         max_id = int(num_s.max() or 0)
         min_id = int(num_s.min() or 0)
     else:
         max_id, min_id = max(len(alerts) - 1, 0), 0
 
+    # Determine default alert ID (top-ranked threat in queue, or min_id)
+    default_alert_id = (
+        int(alerts.iloc[0]["_alert_id"]) if is_all_numeric
+        else str(alerts.iloc[0]["_alert_id"])
+    ) if not alerts.empty else min_id
+
+    # Apply pending preset alert selection before input widget instantiation
+    if "ai_pending_search_id" in st.session_state:
+        st.session_state["ai_search_id_input"] = st.session_state.pop("ai_pending_search_id")
+
     col_s1, col_s2, col_s3, col_s4, col_s5 = st.columns([1.5, 1, 1, 1, 1])
     with col_s1:
         if is_all_numeric or (total_corpus_alerts and total_corpus_alerts > 0):
+            current_raw = st.session_state.get("ai_search_id_input", default_alert_id)
+            try:
+                current_val = int(current_raw)
+            except (ValueError, TypeError):
+                current_val = int(default_alert_id) if is_all_numeric else min_id
+            current_val = max(min_id, min(max_id, current_val))
             search_id = st.number_input(
                 "Alert Identifier (_alert_id)",
                 min_value=min_id,
                 max_value=max_id,
-                value=int(st.session_state.get("ai_search_id_input", min_id)),
+                value=current_val,
                 step=1,
                 key="ai_search_id_input",
                 help=f"Enter any alert identifier from 0 to {max_id:,} to inspect full forensic telemetry."
             )
         else:
             id_options = alerts["_alert_id"].astype(str).tolist()[:5000]
-            default_val = st.session_state.get("ai_search_id_input", id_options[0] if id_options else "")
+            default_val = st.session_state.get("ai_search_id_input", str(default_alert_id) if id_options else "")
             default_idx = id_options.index(str(default_val)) if str(default_val) in id_options else 0
             search_id = st.selectbox(
                 "Alert Identifier (_alert_id)",
@@ -87,32 +131,40 @@ def render_alert_investigation_view(
         if st.button("⚡ Top #1 Threat", width="stretch", key="ai_btn_top1"):
             top1 = alerts.iloc[0] if not alerts.empty else None
             if top1 is not None:
-                st.session_state["ai_search_id_input"] = int(top1["_alert_id"]) if is_all_numeric else str(top1["_alert_id"])
+                st.session_state["ai_pending_search_id"] = int(top1["_alert_id"]) if is_all_numeric else str(top1["_alert_id"])
                 st.rerun()
+            else:
+                st.warning("No alerts loaded in queue.")
     with col_s3:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
         if st.button("🔥 Top #25 Threat", width="stretch", key="ai_btn_top25"):
             idx = min(24, len(alerts) - 1)
             top25 = alerts.iloc[idx] if not alerts.empty else None
             if top25 is not None:
-                st.session_state["ai_search_id_input"] = int(top25["_alert_id"]) if is_all_numeric else str(top25["_alert_id"])
+                st.session_state["ai_pending_search_id"] = int(top25["_alert_id"]) if is_all_numeric else str(top25["_alert_id"])
                 st.rerun()
+            else:
+                st.warning("No alerts loaded in queue.")
     with col_s4:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
         if st.button("🚨 Top #100 Threat", width="stretch", key="ai_btn_top100"):
             idx = min(99, len(alerts) - 1)
             top100 = alerts.iloc[idx] if not alerts.empty else None
             if top100 is not None:
-                st.session_state["ai_search_id_input"] = int(top100["_alert_id"]) if is_all_numeric else str(top100["_alert_id"])
+                st.session_state["ai_pending_search_id"] = int(top100["_alert_id"]) if is_all_numeric else str(top100["_alert_id"])
                 st.rerun()
+            else:
+                st.warning("No alerts loaded in queue.")
     with col_s5:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
         if st.button("🎯 Random Incident", width="stretch", key="ai_btn_random"):
             inc_sample = alerts[alerts["actual_incident"] == 1]
             if not inc_sample.empty:
                 pick = inc_sample.sample(1).iloc[0]
-                st.session_state["ai_search_id_input"] = int(pick["_alert_id"]) if is_all_numeric else str(pick["_alert_id"])
+                st.session_state["ai_pending_search_id"] = int(pick["_alert_id"]) if is_all_numeric else str(pick["_alert_id"])
                 st.rerun()
+            else:
+                st.warning("No confirmed incidents available in current queue.")
 
     # Locate alert in active memory queue
     if is_all_numeric:
@@ -140,7 +192,7 @@ def render_alert_investigation_view(
                 pass
 
     if selected.empty:
-        st.warning(f"No alert found for Alert ID: {search_id}")
+        st.warning(f"🔍 No alert record found for Alert ID: #{search_id}. Please select an operational preset (Top #1, #25, #100) or enter a valid alert identifier.")
         return
 
     row = selected.iloc[0]
@@ -271,7 +323,7 @@ def render_alert_investigation_view(
         ]
         checks_html = ""
         for name, val in fields:
-            is_present = pd.notna(val) and str(val).strip() != "" and str(val).lower() not in ["none", "nan", "[]"]
+            is_present = validate_evidence_field(name, val)
             icon = "✅" if is_present else "❌"
             color = "#34D399" if is_present else "#F87171"
             status_text = "Verified" if is_present else "Missing Evidence Gap"
@@ -322,10 +374,6 @@ def render_alert_investigation_view(
         """,
         unsafe_allow_html=True
     )
-
-    # 5. Raw Telemetry Record Inspector
-    with st.expander("📄 Full Telemetry Record Inspector (Raw Schema)", expanded=False):
-        st.json(row.dropna().to_dict())
 
     # 5. Raw Telemetry Record Inspector
     with st.expander("📄 Full Telemetry Record Inspector (Raw Schema)", expanded=False):
